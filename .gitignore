@@ -23,3 +23,6 @@
 *.hex
 *.CVS
 *CVS
+CMakeFiles
+CMakeCache.txt
+bin_x64
