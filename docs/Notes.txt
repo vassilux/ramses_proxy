@@ -1,0 +1,29 @@
+1. Installation de boost 
+	1.1 Ajouter dans /etc/apt/sources.list deb http://backports.debian.org/debian-backports lenny-backports main 
+	En cas de problème des mirroirs il faut ajouter 
+	deb http://ftp.fr.debian.org/debian/ lenny main
+	deb-src http://ftp.fr.debian.org/debian/ lenny main
+	1.2  apt-get -t lenny-backports install libboost1.40-all-dev
+	1.3 voir s'il faut installer gcc , make et peut être cmake s'il  faut recompiler à partir de sources
+	1.4 exemple de la ligne de commande : 
+		--config /ERMO/param --daemon --log /ERMO/log/tech --help
+		--config /ERMO/param --log /ERMO/log/tech
+
+2. Démarrage de l'application
+	2.1 dans un console  : --config /ERMO/param --log /ERMO/log/tech 
+        	2.2 comme un daemon : --config /ERMO/param --log /ERMO/log/tech --daemon
+        	2.3 Configuration de niveau de log. 
+	Fichier de configuration de log par defaut est dans le réperoitre /ERMO/param. Nom de fichier est rart_log.conf et nde doit pas être changé.
+	Voici un example de paramètrage de niveau de log d'explotaiton en état normale 
+	Production level example : 
+	[levels]
+	TRACE = 80, LOG_CRIT 
+	Voici un example de paramètrage de niveau de log d'explotaiton en ca de récupération de log de la communicaiton entre les transmitteurs et le frontal F1  
+	[levels]
+	TRACE = 10, LOG_CRIT 
+	Initialization de fichier de log(schèma) et la taille de retation. Fichier /ERMO/log/tech/raRt.log sera trunké à 5M bytes.
+	[rules]
+	rart_cat.TRACE      "/ERMO/log/tech/raRt.log", 5MB
+3. Utilisation
+	3.1 Possibile de modifier le niveu de log à chaud. Editer le fichier de paramètres /ERMO/param/raRt.cfg et modififier la valeur de loglevel. Trouver le pid du processus ps aux|grep raRt.
+	Envoier un signal kill -10 [pid].

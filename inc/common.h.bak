@@ -1,0 +1,200 @@
+/*
+ * common.h
+ *
+ *  Created on: Jul 17, 2010
+ *      Author: vassilux
+ */
+
+#ifndef COMMON_H_
+#define COMMON_H_
+
+#define BOOST_NO_CODE_GENERATION_FOR_LOG
+
+#include <algorithm>
+#include <cstdlib>
+#include <deque>
+#include <list>
+#include <set>
+#include <string>
+#include <stack>
+#include <string>
+#include <locale>
+#include <ostream>
+#include <sstream>
+#include <stdio.h>
+#include <algorithm>
+#include <exception>
+
+#ifndef BOOST_HAS_THREADS
+#define BOOST_HAS_THREADS
+#endif 
+
+
+#include <boost/asio.hpp>
+#include <boost/thread.hpp>
+#include <boost/bind.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
+#include <boost/noncopyable.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/date_time/date_facet.hpp>
+#include <boost/date_time/time_facet.hpp>
+#include <boost/date_time/gregorian/gregorian.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/date_time/local_time/local_time.hpp>
+#include <boost/asio.hpp>
+
+#ifndef WIN32
+#include <syslog.h>
+#include <signal.h>
+#endif
+
+#include "util.h"
+
+#if 1
+#include <boost/config.hpp>
+#include <boost/program_options/detail/config_file.hpp>
+#include <boost/program_options/parsers.hpp>
+#include <boost/program_options/variables_map.hpp>
+
+namespace pod = boost::program_options::detail;
+
+#endif 
+
+static char * file_bname = NULL;
+#define __STRIPPED_FILE__   (file_bname ?: (file_bname = basename(__FILE__)))
+
+
+#ifndef BOOST_NO_CODE_GENERATION_FOR_LOG
+#include "logging.h"
+#endif
+
+#ifdef BOOST_NO_CODE_GENERATION_FOR_LOG
+#include "mtk/mtktrace.hpp"
+#endif
+
+namespace asio = boost::asio;
+
+namespace ip = boost::asio::ip;
+
+
+struct RelayMessage
+{
+		boost::shared_ptr<std::string> m_message;
+		ip::udp::endpoint m_remoteTo;
+		long m_expireClock;
+};
+
+typedef std::list<RelayMessage> RelayMessageQueue;
+
+#define NETWOR_BUFFER_SIZE 512
+
+class NetworkBuffer : public boost::array<char, NETWOR_BUFFER_SIZE>
+{
+protected:
+	size_t m_nDataSize;
+public:
+	NetworkBuffer() : m_nDataSize(NETWOR_BUFFER_SIZE) {}
+	void setDataSize(size_t nDataSize)
+	{
+		m_nDataSize = nDataSize;
+	}
+
+	size_t getDataSize() { return m_nDataSize; }
+
+	void clear()
+	{
+		memset(c_array(), 0, NETWOR_BUFFER_SIZE);
+	}
+};
+
+
+std::string makeHex(const char* pcBuffer, size_t nSize);
+
+void split_addr (char *ip_port, char *ip, char *port);
+
+
+
+class SyslogTemporary
+{
+friend SyslogTemporary SysLog(int iPriority);
+private:
+    std::stringstream m_Accumulator;
+    int m_iPriority;
+public:
+    SyslogTemporary(int Priority):
+          m_iPriority(Priority)
+    {};
+    template <class T>
+    std::ostream& operator<<(const T& _what)
+    {
+        return m_Accumulator << _what;
+    };
+    SyslogTemporary(const SyslogTemporary& rhs)
+    {
+       m_iPriority = rhs.m_iPriority;
+    }
+    ~SyslogTemporary()
+    {
+         // Hope nothing throws an exception :)
+         std::string sResult = m_Accumulator.str();
+         if (sResult.length())
+         {
+#ifndef WIN32
+			  syslog(m_iPriority, "%s", sResult.c_str());
+#endif
+            
+         }
+    }
+};
+
+extern int g_nLogLevel;
+
+#ifndef WIN32
+
+#else
+#define LOG_DEBUG 1
+#define LOG_WARNING 2
+#define LOG_USER 3
+#define LOG_CRIT 4
+
+#endif
+
+#define RART_LOG_ERROR		1 //BOOST_LOG_LEVEL_1 
+#define RART_LOG_INFO		2 //BOOST_LOG_LEVEL_2
+#define RART_LOG_TRACE		4 //BOOST_LOG_LEVEL_3
+#define RART_LOG_DEBUG		7 //BOOST_LOG_LEVEL_4
+
+SyslogTemporary SysLog(int iPriority);
+
+//BOOST_LOG_(level,_trace);
+
+#define SYS_LOG( level, _trace )                                            \
+  { std::stringstream ss; ss << _trace; SysLog(level) << " in " << __FUNCTION__ << "line : " << __LINE__ << " " << _trace; }
+
+#ifdef BOOST_NO_CODE_GENERATION_FOR_LOG
+#define TRACE( level, _trace )	                                            \
+		if(level & g_nLogLevel) \
+		{	\
+			boost::posix_time::ptime t(boost::posix_time::microsec_clock::local_time()); \
+			std::stringstream ss; ss << "[ " << t << " ]" << _trace; \
+			boost::filesystem::path p(__BASE_FILE__); \
+			if(level == RART_LOG_ERROR) \
+				mtkerr("[%s %ld] %s\n", p.leaf().c_str(), __LINE__, ss.str().c_str()); \
+			else if(level == RART_LOG_INFO ) \
+				mtkwarn("[%s %ld] %s\n", p.leaf().c_str(), __LINE__, ss.str().c_str()); \
+			else \
+				mtklog("[%s %ld] %s\n", p.leaf().c_str(), __LINE__, ss.str().c_str()); \
+ }
+#else
+#define TRACE( level, _trace )	                                            \
+		BOOST_LOG_(level,_trace);
+#endif
+
+
+
+#endif /* COMMON_H_ */
+//	\\std::stringstream ss; ss << _trace; std::cout << "in " <<  __FUNCTION__ << " line : " << __LINE__ << " " _trace << std::endl; 
+ 

@@ -1,0 +1,59 @@
+cmake_minimum_required(VERSION 2.6)
+
+#Configuration du projet
+project(test_kaRt)
+
+SET(CMAKE_VERBOSE_MAKEFILE 1)
+
+
+#Inclusion de Boost
+include(FindBoost)
+find_package(
+	Boost
+	1.40.0
+	REQUIRED system
+	REQUIRED thread
+	REQUIRED program_options
+	REQUIRED unit_test_framework
+)
+
+link_directories(${Boost_LIBRARY_DIRS})
+include_directories(${Boost_INCLUDE_DIRS}, ../../inc)
+
+#Configuration de l'exécutable
+file(
+	GLOB_RECURSE
+	source_files
+	../../src/*.cpp
+)
+
+
+
+#for x64 m64
+#set_target_properties(dummyUnitTest PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
+
+
+set (TESTS_PROTOCOL_SOURCES
+	./test_protocol.cpp
+     )
+
+
+
+if (TESTS_PROTOCOL_SOURCES)
+	
+	set(Boost_USE_STATIC_LIBS ON)
+	set(Boost_USE_MULTITHREAD ON)
+
+	set (TESTS_PROTOCOL unit_protocol)
+	add_executable (${TESTS_PROTOCOL} ${TESTS_PROTOCOL_SOURCES})
+	target_link_libraries (${TESTS_PROTOCOL} ${Boost_LIBRARIES})
+	add_test (test_${TESTS_PROTOCOL} ${TESTS_PROTOCOL})
+endif ()
+
+
+enable_testing ()
+
+
+
+
+

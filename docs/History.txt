@@ -1,0 +1,20 @@
+05/10/2013 : v 1.2.1
+	Nettoyage de code.
+	Code de logger "mtk " est supprimé
+30/04//2013 : v 1.2.0
+	Modificaiton de la gestion de log. Ajout de la rotation de log  et la gestion de niveau de log plus fin.
+16/10/2011 : v 1.1.0
+	Corréction de la gestion des logs. Modifications de niveau de log 
+	#define RART_LOG_ERROR		1 
+	#define RART_LOG_INFO		2 
+	#define RART_LOG_TRACE		3 
+	#define RART_LOG_DEBUG		4 
+
+20/06/2011 : v 1.0.2.1
+	Ajout de log pour notifications d'arrêt/démarrage de l'application. Fichier raRt_events.log se trouve dans la même répertoire que les logs normale.
+	Pour arrêter l'application "proprement" il fait envoyer kill -15 [pid]
+08/05/2011
+	Ajout de possibilitée de modification de niveau de log via kill -10 [pid]
+23/11/2010 
+	Démarrage du projet
+

@@ -1,0 +1,9 @@
+Package: ramsesrouter
+Version: 1.0.2
+Section: devel
+Priority: optional
+Architecture: amd64
+Depends: libboost1.40-all-dev
+Maintainer: vassilux 
+Description: raRt - simple udp to tcp router 
+
